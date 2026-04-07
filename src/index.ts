@@ -1,14 +1,18 @@
-import express, { urlencoded } from 'express';
+import express, { type Request, type Response, Router, urlencoded } from 'express';
 
-import { subscriptionsRouter } from './api/subscriptions';
-
+// import subscriptionsRouter from './routes/subscription';
+//
 const app = express();
-const PORT = 3000;
+const port = 3001;
 
-app.use(urlencoded({ extended: false }));
-
-app.use('/api', subscriptionsRouter);
-
-app.listen(PORT, () => {
-	console.log(`[server]: Server is running at port: ${PORT}`);
+app.get('/', (req: Request, res: Response) => {
+    res.send('Hello World!1')
+})
+//
+// app.use(urlencoded({ extended: false }));
+//
+// app.use('/api', subscriptionsRouter);
+//
+app.listen(port, () => {
+	console.log(`[server]: Server is running at port: ${port}`);
 });
