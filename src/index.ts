@@ -1,12 +1,38 @@
-import express, { Request, Response } from 'express';
+import express, { type Request, type Response, urlencoded } from 'express';
+
+import subscriptionsRouter from './routes/subscription';
+import { prisma } from "../lib/prisma";
 
 const app = express();
-const PORT = 3000;
+const port = 3000;
 
 app.get('/', (req: Request, res: Response) => {
-	res.send('Express + TypeScript Server');
-});
+    res.send('Hello World!1')
+})
 
-app.listen(PORT, () => {
-	console.log(`[server]: Server is running at port: ${PORT}`);
+app.use(urlencoded({ extended: false }));
+
+app.use('/api', subscriptionsRouter);
+
+async function main() {
+    try {
+        await prisma.$connect().then(() => {
+            console.log('[server]: Server is connected to DB');
+        })
+        app.listen(port, () => {
+            console.log(`[server]: Server is running at port: ${port}`);
+        });
+    } catch (error) {
+        console.error(error)
+    } finally {
+        await prisma.$disconnect()
+    }
+}
+
+main();
+
+process.on("SIGINT", async() => {
+    await prisma.$disconnect();
+    console.log("[server]: Server is stopped");
+    process.exit();
 });

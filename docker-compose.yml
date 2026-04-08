@@ -1,22 +1,22 @@
 services:
-#  postgres:
-#    image: postgres:18-alpine
-#    container_name: task_postgres
-#    restart: unless-stopped
-#    environment:
-#      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-#      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-#      POSTGRES_DB: ${POSTGRES_DB:-taskdb}
-#    ports:
-#      - "5432:5432"
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-taskdb}"]
-#      interval: 10s
-#      timeout: 5s
-#      retries: 5
-#      start_period: 10s
+  postgres:
+    image: postgres:18-alpine
+    container_name: task_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-taskdb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-taskdb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 #
 #  redis:
 #    image: redis:8.6-alpine
@@ -40,24 +40,24 @@ services:
       target: builder
     container_name: task_be
     restart: always
-#    depends_on:
-#      postgres:
-#        condition: service_healthy
+    depends_on:
+      postgres:
+        condition: service_healthy
 #      redis:
 #        condition: service_healthy
     environment:
       NODE_ENV: development
       PORT: 3000
-#      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-taskdb}
-#      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-taskdb}
+      REDIS_URL: redis://redis:6379
     ports:
       - "4443:3000"
     volumes:
       - .:/app
       - /app/node_modules
-    command: "npm run dev"
+    command: sh -c "npx prisma migrate deploy && npm run dev"
 
-#volumes:
-#  postgres_data:
+volumes:
+  postgres_data:
 #  redis_data:
 

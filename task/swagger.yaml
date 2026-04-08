@@ -3,7 +3,8 @@ info:
   description: "GitHub Release Notification API that allows users to subscribe to email notifications about new releases of a chosen GitHub repository."
   version: "1.0.0"
   title: "GitHub Release Notification API"
-host: "releases-api.app"
+host: "127.0.0.1:3000"
+#host: "releases-api.app"
 basePath: "/api"
 tags:
   - name: "subscription"
