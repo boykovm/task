@@ -1,5 +1,5 @@
-import {type Request, type Response, Router} from "express";
-import {createSubscription} from "../controllers/subscription";
+import { type Request, type Response, Router } from "express";
+import { createSubscription } from "../controllers/subscription";
 
 const subscriptionsRouter = Router()
 
