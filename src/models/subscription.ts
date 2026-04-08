@@ -8,3 +8,14 @@ export const create = async (data: CreateSubscriptionDto) => {
 
     return subscription;
 }
+
+export const getSubscriptionsByEmail = async (email: string)=> {
+    return await prisma.subscription.findMany({
+        where: {
+            email
+        },
+        omit: {
+            id: true,
+        }
+    })
+}
