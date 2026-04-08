@@ -24,15 +24,15 @@ async function main() {
         });
     } catch (error) {
         console.error(error)
-    } finally {
-        await prisma.$disconnect()
     }
 }
 
 main();
 
 process.on("SIGINT", async() => {
-    await prisma.$disconnect();
+    await prisma.$disconnect()
+        .then(() => console.log("[server]: Server is disconnected from DB"))
+        .catch(() => console.error("[server]: Server is disconnected from DB with error"));
     console.log("[server]: Server is stopped");
     process.exit();
 });

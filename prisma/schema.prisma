@@ -18,4 +18,6 @@ model Subscription {
   repo          String
   confirmed     Boolean @default(false)
   last_seen_tag String  @default("")
+
+  @@unique([email, repo])
 }
