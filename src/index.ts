@@ -30,3 +30,9 @@ async function main() {
 }
 
 main();
+
+process.on("SIGINT", async() => {
+    await prisma.$disconnect();
+    console.log("[server]: Server is stopped");
+    process.exit();
+});
