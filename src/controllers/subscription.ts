@@ -48,7 +48,7 @@ export const createSubscription = async (req: Request, res: Response) => {
 
         const { token } = await create({ email, repo })
 
-        await sendConfirmationEmail(email, token)
+        await sendConfirmationEmail(email, token).catch(e => console.error(e))
 
         res.send('Subscription successful. Confirmation email sent.')
     } catch (error) {
