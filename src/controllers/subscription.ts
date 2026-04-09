@@ -23,17 +23,19 @@ export const createSubscription = async (req: Request, res: Response) => {
             errors.push('Repository is required')
         }
 
-
         if (repo.split('/').length !== 2) {
             errors.push('Repository must be in the format "owner/repo"')
         }
 
-        const [owner, repoName] = repo.split('/')
+        const [owner = '', repoName = ''] = repo.split('/').map((el: string) => el.trim())
+
+        if (!owner.length || !repoName.length) {
+            errors.push('Repository must be in the format "owner/repo"')
+        }
 
         if (errors.length) {
             return res.status(400).send(errors.join(', '))
         }
-
 
         if (!(await isRepoExists(owner, repoName))) {
             return res.status(404).send('Repository not found on GitHub')
