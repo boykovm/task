@@ -13,11 +13,19 @@ datasource db {
 }
 
 model Subscription {
-  id            String  @id @default(uuid())
+  id            String         @id @default(uuid())
   email         String
   repo          String
-  confirmed     Boolean @default(false)
-  last_seen_tag String  @default("")
+  confirmed     Boolean        @default(false)
+  last_seen_tag String         @default("")
+  confirmations Confirmation[]
 
   @@unique([email, repo])
+}
+
+model Confirmation {
+  id             String       @id @default(uuid())
+  token          String
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
 }

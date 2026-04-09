@@ -1,12 +1,25 @@
 import { prisma } from "../../lib/prisma";
 import type { CreateSubscriptionDto } from "./subscription.entity";
+import { generateToken } from "../services/jwt.service";
 
 export const create = async (data: CreateSubscriptionDto) => {
+    const token = generateToken(data.email, data.repo);
+
     const subscription = await prisma.subscription.create({
-        data
+        data: {
+            ...data,
+            confirmations: {
+                create: {
+                    token,
+                }
+            }
+        }
     });
 
-    return subscription;
+    return {
+        subscription,
+        token,
+    } ;
 }
 
 export const getSubscriptionsByEmail = async (email: string)=> {

@@ -58,6 +58,9 @@ services:
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-taskdb}
       REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret}
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
     ports:
       - "4443:3000"
     volumes:
