@@ -2,7 +2,7 @@ import { type Request, type Response } from "express";
 import { type PrismaClientKnownRequestError } from "../../generated/prisma/internal/prismaNamespace";
 
 import { create, getSubscriptionsByEmail } from "../models/subscription";
-import { isRepoExists } from "../utils/github";
+import { isRepoExists } from "../services/github.service";
 import { sendEmail } from "../services/email.service";
 
 export const createSubscription = async (req: Request, res: Response) => {
@@ -23,11 +23,19 @@ export const createSubscription = async (req: Request, res: Response) => {
             errors.push('Repository is required')
         }
 
+
+        if (repo.split('/').length !== 2) {
+            errors.push('Repository must be in the format "owner/repo"')
+        }
+
+        const [owner, repoName] = repo.split('/')
+
         if (errors.length) {
             return res.status(400).send(errors.join(', '))
         }
 
-        if (!(await isRepoExists(repo))) {
+
+        if (!(await isRepoExists(owner, repoName))) {
             return res.status(404).send('Repository not found on GitHub')
         }
 
