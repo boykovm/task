@@ -3,6 +3,7 @@ import { type PrismaClientKnownRequestError } from "../../generated/prisma/inter
 
 import { create, getSubscriptionsByEmail } from "../models/subscription";
 import { isRepoExists } from "../utils/github";
+import { sendEmail } from "../services/email.service";
 
 export const createSubscription = async (req: Request, res: Response) => {
     try {
@@ -31,6 +32,8 @@ export const createSubscription = async (req: Request, res: Response) => {
         }
 
         const subscription = await create({ email, repo })
+
+        await sendEmail(email)
         console.log(subscription.id)
 
         res.send('subscribe!')
