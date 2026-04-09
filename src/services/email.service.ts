@@ -12,10 +12,23 @@ const nodemailerConfig: SMTPPool.Options = {
 const transporter = nodemailer.createTransport(nodemailerConfig);
 
 export const sendEmail = async (email: string) => {
-	transporter.sendMail({
+	await transporter.sendMail({
 		from: 'test@example.com',
 		to: email,
 		subject: 'Local Docker Email',
 		text: 'It works!'
+	});
+}
+
+export const sendConfirmationEmail = async (email: string, token: string) => {
+	const convertedToken = Buffer.from(token).toString('base64url');
+
+	const confirmationLink = `http://localhost:3000/api/confirm/${convertedToken}`;
+
+	await transporter.sendMail({
+		from: 'test@example.com',
+		to: email,
+		subject: 'Confirm your subscription',
+		text: `Please click on the link below to confirm your subscription: ${confirmationLink}`
 	});
 }

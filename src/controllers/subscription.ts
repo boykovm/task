@@ -3,7 +3,11 @@ import { type PrismaClientKnownRequestError } from "../../generated/prisma/inter
 
 import { create, getSubscriptionsByEmail } from "../models/subscription";
 import { isRepoExists } from "../services/github.service";
-import { sendEmail } from "../services/email.service";
+import { sendConfirmationEmail } from "../services/email.service";
+import { verifyToken } from "../services/jwt.service";
+import {
+    confirmSubscription as confirmSubscriptionByEmailAndToken,
+} from "../models/confirmation";
 
 export const createSubscription = async (req: Request, res: Response) => {
     try {
@@ -41,12 +45,11 @@ export const createSubscription = async (req: Request, res: Response) => {
             return res.status(404).send('Repository not found on GitHub')
         }
 
-        const subscription = await create({ email, repo })
+        const { token } = await create({ email, repo })
 
-        await sendEmail(email)
-        console.log(subscription.id)
+        await sendConfirmationEmail(email, token)
 
-        res.send('subscribe!')
+        res.send('Subscription successful. Confirmation email sent.')
     } catch (error) {
         if (error instanceof Error && error.name === 'PrismaClientKnownRequestError' && (error as PrismaClientKnownRequestError).code === 'P2002') {
                 return res.status(409).send('Email already subscribed to this repository')
@@ -65,13 +68,28 @@ export const confirmSubscription = async (req: Request, res: Response) => {
             return res.status(400).send('Invalid token')
         }
 
-        if (token != 'qwe') {
+        const decodedToken = Buffer.from(token as string, 'base64url').toString('utf-8');
+
+        let data;
+
+        try {
+            data = verifyToken(decodedToken)
+        } catch (error) {
+            return res.status(400).send('Invalid token')
+        }
+
+        if (!data) {
+            return res.status(400).send('Invalid token')
+        }
+
+        const confirmationId = await confirmSubscriptionByEmailAndToken(data.email, decodedToken)
+
+        if (!confirmationId) {
             return res.status(404).send('Token not found')
         }
 
         res.status(200).send('Subscription confirmed successfully')
     } catch (error) {
-        console.error(error)
         res.status(500).send('Internal Server Error')
     }
 }
@@ -106,8 +124,6 @@ export const getSubscriptions = async (req: Request, res: Response) => {
         const subscriptions = await getSubscriptionsByEmail(email)
 
         res.status(200).send(subscriptions)
-
-
     } catch (error) {
         console.error(error)
         res.status(500).send('Internal Server Error')
