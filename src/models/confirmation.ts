@@ -1,69 +1,77 @@
 import { prisma } from "../../lib/prisma";
 import type { Confirmation } from "./confirmation.entity";
+import { ConfirmationAction } from "../../generated/prisma/enums";
+import { generateToken } from "../services/jwt.service";
 
-export const findConfirmationByEmailAndToken = async (email: string, token: string): Promise<Confirmation | null> => {
+export const findConfirmation = async (email: string, token: string, action: ConfirmationAction): Promise<Confirmation | null> => {
     return await prisma.confirmation.findFirst({
         where: {
             token,
+            action,
             subscription: {
                 email,
-            }
+            },
         }
     });
 }
 
-export const confirmSubscription = async (email: string, token: string) => {
-    const confirmation = await findConfirmationByEmailAndToken(email, token);
+export const confirmSubscription = async (email: string, repo: string, token: string) => {
+    const confirmation = await findConfirmation(email, token, ConfirmationAction.SUBSCRIBE);
 
     if (!confirmation) {
         return null
-        // throw new Error('Confirmation not found');
     }
 
-    await prisma.subscription.update({
-        where: {
-            id: confirmation.subscriptionId,
-        },
-        data: {
-            confirmed: true,
-        }
-    });
+    const newToken = generateToken(email, repo, ConfirmationAction.UNSUBSCRIBE);
 
-    await prisma.confirmation.delete({
+    await prisma.confirmation.update({
         where: {
             id: confirmation.id,
+        },
+        data: {
+            action: ConfirmationAction.UNSUBSCRIBE,
+            token: newToken,
+            subscription: {
+                update: {
+                    data: {
+                        confirmed: true,
+                    }
+                }
+            }
         }
-    });
+    })
 
-    return confirmation.id;
+    return newToken;
 }
 
-export const confirmSubscription1 = async (confirmationId: string) => {
-    const confirmation = await prisma.confirmation.findUnique({
-        where: {
-            id: confirmationId,
-        },
-        include: {
-            subscription: true,
-        }
-    });
+export const unsubscribeFromSubscription = async (email: string, repo: string, token: string) => {
+    const confirmation = await findConfirmation(email, token, ConfirmationAction.UNSUBSCRIBE);
 
     if (!confirmation) {
-        throw new Error('Confirmation not found');
+        return null
     }
+
+    const newToken = generateToken(email, repo, ConfirmationAction.SUBSCRIBE);
 
     await prisma.subscription.update({
         where: {
             id: confirmation.subscriptionId,
         },
         data: {
-            confirmed: true,
+            confirmed: false,
+            confirmations: {
+                update: {
+                    where: {
+                        id: confirmation.id
+                    },
+                    data: {
+                        action: ConfirmationAction.SUBSCRIBE,
+                        token: newToken
+                    }
+                }
+            }
         }
     });
 
-    await prisma.confirmation.delete({
-        where: {
-            id: confirmationId,
-        }
-    });
+    return newToken;
 }

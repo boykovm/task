@@ -24,8 +24,14 @@ model Subscription {
 }
 
 model Confirmation {
-  id             String       @id @default(uuid())
+  id             String             @id @default(uuid())
   token          String
   subscriptionId String
-  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  action         ConfirmationAction @default(SUBSCRIBE)
+  subscription   Subscription       @relation(fields: [subscriptionId], references: [id])
+}
+
+enum ConfirmationAction {
+  SUBSCRIBE
+  UNSUBSCRIBE
 }
