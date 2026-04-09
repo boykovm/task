@@ -10,17 +10,15 @@
     "watch": "npx tsx --inspect --watch src/index.ts",
     "debug": "npx tsx --inspect-brk --watch src/index.ts",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.7.0",
-    "@types/jest": "^30.0.0",
     "@prisma/client": "^7.7.0",
-    "@types/nodemailer": "^8.0.0",
     "jest": "^30.3.0",
     "dotenv": "^17.4.1",
     "express": "^5.2.1",
-    "ts-jest": "^29.4.9",
     "nodemailer": "^8.0.5",
     "pg": "^8.20.0"
   },
@@ -28,6 +26,7 @@
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.5.2",
+    "@types/nodemailer": "^8.0.0",
     "@types/pg": "^8.20.0",
     "jest": "^30.3.0",
     "nodemon": "^3.1.14",
