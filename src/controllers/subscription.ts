@@ -3,11 +3,12 @@ import { type PrismaClientKnownRequestError } from "../../generated/prisma/inter
 
 import { create, getSubscriptionsByEmail } from "../models/subscription";
 import { isRepoExists } from "../services/github.service";
-import { sendConfirmationEmail } from "../services/email.service";
+import { sendConfirmationEmail, sendUpdateEmail } from "../services/email.service";
 import { verifyToken } from "../services/jwt.service";
 import {
-    confirmSubscription as confirmSubscriptionByEmailAndToken,
+    confirmSubscription as confirmSubscriptionByEmailAndToken, unsubscribeFromSubscription,
 } from "../models/confirmation";
+import { ConfirmationAction } from "../../generated/prisma/enums";
 
 export const createSubscription = async (req: Request, res: Response) => {
     try {
@@ -74,6 +75,10 @@ export const confirmSubscription = async (req: Request, res: Response) => {
 
         try {
             data = verifyToken(decodedToken)
+
+            if (data.action !== ConfirmationAction.SUBSCRIBE) {
+                return res.status(400).send('Invalid token')
+            }
         } catch (error) {
             return res.status(400).send('Invalid token')
         }
@@ -82,11 +87,14 @@ export const confirmSubscription = async (req: Request, res: Response) => {
             return res.status(400).send('Invalid token')
         }
 
-        const confirmationId = await confirmSubscriptionByEmailAndToken(data.email, decodedToken)
+        const newToken = await confirmSubscriptionByEmailAndToken(data.email, data.repo, decodedToken)
 
-        if (!confirmationId) {
+        if (!newToken) {
             return res.status(404).send('Token not found')
         }
+
+        await sendUpdateEmail(data.email, newToken, data.repo, ConfirmationAction.SUBSCRIBE)
+            .catch(e => console.error(e))
 
         res.status(200).send('Subscription confirmed successfully')
     } catch (error) {
@@ -102,9 +110,28 @@ export const unsubscribe = async (req: Request, res: Response) => {
             return res.status(400).send('Invalid token')
         }
 
-        if (token != 'qwe') {
+        const decodedToken = Buffer.from(token as string, 'base64url').toString('utf-8');
+
+        let data;
+
+        try {
+            data = verifyToken(decodedToken)
+
+            if (data.action !== ConfirmationAction.UNSUBSCRIBE) {
+                return res.status(400).send('Invalid token')
+            }
+        } catch (error) {
+            return res.status(400).send('Invalid token')
+        }
+
+        const newToken = await unsubscribeFromSubscription(data.email, data.repo, decodedToken)
+
+        if (!newToken) {
             return res.status(404).send('Token not found')
         }
+
+        await sendUpdateEmail(data.email, newToken, data.repo, ConfirmationAction.UNSUBSCRIBE)
+            .catch(e => console.error(e))
 
         res.status(200).send('Unsubscribed successfully')
     } catch (error) {

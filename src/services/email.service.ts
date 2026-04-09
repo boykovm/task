@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import SMTPPool from "nodemailer/lib/smtp-pool";
+import { ConfirmationAction } from "../../generated/prisma/enums";
 
 const nodemailerConfig: SMTPPool.Options = {
 	host: 'mailhog', // Use the Docker service name
@@ -30,5 +31,22 @@ export const sendConfirmationEmail = async (email: string, token: string) => {
 		to: email,
 		subject: 'Confirm your subscription',
 		text: `Please click on the link below to confirm your subscription: ${confirmationLink}`
+	});
+}
+
+export const sendUpdateEmail = async (email: string, token: string, repo: string, action: string) => {
+	const convertedToken = Buffer.from(token).toString('base64url');
+
+	const newLink = action === ConfirmationAction.SUBSCRIBE ? `http://localhost:3000/api/unsubscribe/${convertedToken}` : `http://localhost:3000/api/confirm/${convertedToken}`;
+
+	const status = action === ConfirmationAction.SUBSCRIBE ? 'unsubscribed' : 'subscribed';
+
+	const actionText = action === ConfirmationAction.SUBSCRIBE ? 'unsubscribe' : 'subscribe';
+
+	await transporter.sendMail({
+		from: 'test@example.com',
+		to: email,
+		subject: 'Your subscription was updated',
+		text: `Your subscription for ${repo} was updated to ${status} status. If you want to ${actionText} then click on the link below ${newLink}`
 	});
 }
