@@ -15,3 +15,5 @@ yarn-error.log*
 /generated/prisma
 
 /.env
+
+/coverage
