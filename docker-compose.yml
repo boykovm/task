@@ -17,6 +17,12 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web UI to view emails
 #
 #  redis:
 #    image: redis:8.6-alpine
@@ -43,6 +49,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      mailhog:
+        condition: service_started
 #      redis:
 #        condition: service_healthy
     environment:
