@@ -8,23 +8,31 @@
     "start": "node dist/src/index.js",
     "dev": "npx tsx --watch src/index.ts",
     "watch": "npx tsx --inspect --watch src/index.ts",
-    "debug": "npx tsx --inspect-brk --watch src/index.ts"
+    "debug": "npx tsx --inspect-brk --watch src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.7.0",
+    "@types/jest": "^30.0.0",
     "@prisma/client": "^7.7.0",
     "@types/nodemailer": "^8.0.0",
+    "jest": "^30.3.0",
     "dotenv": "^17.4.1",
     "express": "^5.2.1",
+    "ts-jest": "^29.4.9",
     "nodemailer": "^8.0.5",
     "pg": "^8.20.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/node": "^25.5.2",
     "@types/pg": "^8.20.0",
+    "jest": "^30.3.0",
     "nodemon": "^3.1.14",
     "prisma": "^7.7.0",
+    "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
