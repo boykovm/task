@@ -3,7 +3,7 @@ import { type PrismaClientKnownRequestError } from "../../generated/prisma/inter
 
 import { create, getSubscriptionsByEmail } from "../models/subscription";
 import { getReleaseTagByRepo, isRepoExists } from "../services/github.service";
-import { sendConfirmationEmail, sendUpdateEmail } from "../services/email.service";
+import { isValidEmail, sendConfirmationEmail, sendUpdateEmail } from "../services/email.service";
 import { verifyToken } from "../services/jwt.service";
 import {
     confirmSubscription as confirmSubscriptionByEmailAndToken, unsubscribeFromSubscription,
@@ -28,7 +28,9 @@ export const createSubscription = async (req: Request, res: Response) => {
             errors.push('Repository is required')
         }
 
-        // todo: add validation for email
+        if (!isValidEmail(email)) {
+            errors.push('Email is invalid')
+        }
 
         if (repo.split('/').length !== 2) {
             errors.push('Repository must be in the format "owner/repo"')
@@ -151,9 +153,7 @@ export const getSubscriptions = async (req: Request, res: Response) => {
     try {
         const { email = '' } = req.query
 
-        // todo: add validation for email
-
-        if (!email || Array.isArray(email) || typeof email !== 'string') {
+        if (!email || Array.isArray(email) || typeof email !== 'string' || !isValidEmail(email)) {
             return res.status(400).send('Invalid email')
         }
 
