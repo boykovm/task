@@ -59,3 +59,8 @@ export const sendUpdatedEmail = async (email: string, repo: string, newTag: stri
 		text: `Hi, there is a new release for ${repo} with tag ${newTag}`,
 	})
 }
+
+export const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
