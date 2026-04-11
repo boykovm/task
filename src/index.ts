@@ -2,6 +2,7 @@ import express, { type Request, type Response, urlencoded } from 'express';
 
 import subscriptionsRouter from './routes/subscription';
 import { prisma } from "../lib/prisma";
+import {SchedulerService} from "./services/scheduler.service";
 
 const app = express();
 const port = 3000;
@@ -19,6 +20,7 @@ async function main() {
         await prisma.$connect().then(() => {
             console.log('[server]: Server is connected to DB');
         })
+        SchedulerService.init();
         app.listen(port, () => {
             console.log(`[server]: Server is running at port: ${port}`);
         });
