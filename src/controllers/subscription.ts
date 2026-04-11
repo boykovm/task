@@ -90,9 +90,6 @@ export const confirmSubscription = async (req: Request, res: Response) => {
             return res.status(400).send('Invalid token')
         }
 
-        if (!data) {
-            return res.status(400).send('Invalid token')
-        }
 
         const newToken = await confirmSubscriptionByEmailAndToken(data.email, data.repo, decodedToken)
 
