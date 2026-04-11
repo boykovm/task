@@ -2,7 +2,7 @@ import { type Request, type Response } from "express";
 import { type PrismaClientKnownRequestError } from "../../generated/prisma/internal/prismaNamespace";
 
 import { create, getSubscriptionsByEmail } from "../models/subscription";
-import { isRepoExists } from "../services/github.service";
+import { getReleaseTagByRepo, isRepoExists} from "../services/github.service";
 import { sendConfirmationEmail, sendUpdateEmail } from "../services/email.service";
 import { verifyToken } from "../services/jwt.service";
 import {
@@ -28,6 +28,8 @@ export const createSubscription = async (req: Request, res: Response) => {
             errors.push('Repository is required')
         }
 
+        // todo: add validation for email
+
         if (repo.split('/').length !== 2) {
             errors.push('Repository must be in the format "owner/repo"')
         }
@@ -46,12 +48,15 @@ export const createSubscription = async (req: Request, res: Response) => {
             return res.status(404).send('Repository not found on GitHub')
         }
 
-        const { token } = await create({ email, repo })
+        const tag = await getReleaseTagByRepo(`${owner}/${repoName}`)
+
+        const { token } = await create({ email, repo, last_seen_tag: tag })
 
         await sendConfirmationEmail(email, token).catch(e => console.error(e))
 
         res.send('Subscription successful. Confirmation email sent.')
     } catch (error) {
+        // todo: add rollback logic
         if (error instanceof Error && error.name === 'PrismaClientKnownRequestError' && (error as PrismaClientKnownRequestError).code === 'P2002') {
                 return res.status(409).send('Email already subscribed to this repository')
         }
@@ -98,6 +103,7 @@ export const confirmSubscription = async (req: Request, res: Response) => {
 
         res.status(200).send('Subscription confirmed successfully')
     } catch (error) {
+        // todo: add rollback logic
         res.status(500).send('Internal Server Error')
     }
 }
@@ -135,6 +141,7 @@ export const unsubscribe = async (req: Request, res: Response) => {
 
         res.status(200).send('Unsubscribed successfully')
     } catch (error) {
+        // todo: add rollback logic
         console.error(error)
         res.status(500).send('Internal Server Error')
     }
@@ -144,6 +151,8 @@ export const getSubscriptions = async (req: Request, res: Response) => {
     try {
         const { email = '' } = req.query
 
+        // todo: add validation for email
+
         if (!email || Array.isArray(email) || typeof email !== 'string') {
             return res.status(400).send('Invalid email')
         }
@@ -152,6 +161,7 @@ export const getSubscriptions = async (req: Request, res: Response) => {
 
         res.status(200).send(subscriptions)
     } catch (error) {
+        // todo: add rollback logic
         console.error(error)
         res.status(500).send('Internal Server Error')
     }
