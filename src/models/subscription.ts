@@ -33,3 +33,31 @@ export const getSubscriptionsByEmail = async (email: string)=> {
         }
     })
 }
+
+export const getAllSubscribedRepos = async () => {
+    return await prisma.subscription.findMany({
+        where: {
+            confirmed: true
+        },
+        select: {
+            repo: true,
+            last_seen_tag: true,
+        },
+        distinct: ["repo"]
+    })
+}
+
+export const getEmailsListByRepoAndTagAndUpdateTag = async (repo: string, last_seen_tag: string, newTag: string) => {
+    return await prisma.subscription.updateManyAndReturn({
+        select: {
+            email: true,
+        },
+        where: {
+            repo,
+            confirmed: true
+        },
+        data: {
+            last_seen_tag: newTag
+        }
+    })
+}

@@ -1,36 +1,41 @@
 import cron from 'node-cron';
+import {
+    getAllSubscribedRepos,
+    getEmailsListByRepoAndTagAndUpdateTag
+} from "../models/subscription";
+import { getUpdatedTag } from "./github.service";
+import { sendUpdatedEmail } from "./email.service";
+
+
 
 export class SchedulerService {
+    private static isPreviousTaskEnded = true;
+
     public static init() {
-        // Runs every day at midnight (0 0 * * *)
-        cron.schedule('0 0 * * *', async () => {
-            try {
-                await this.performDailyCleanup();
-            } catch (error) {
-                console.error('Cleanup failed:', error);
-            }
-        });
-
-        // add scheduler to run every 15 minutes
-        // cron.schedule('*/15 * * * *', async () => {
-        cron.schedule('*/1 * * * *', async () => {
-            try {
-                await this.doSomething();
-            } catch (error) {
-                console.error('every 15 min:', error);
-            }
-        })
+        cron.schedule('*/15 * * * *', () => this.watcher());
     }
 
-    private static async doSomething() {
-        console.log('Executing doSomething logic...');
-    }
+    private static async watcher(){
+        if (!this.isPreviousTaskEnded) {
+            return;
+        }
 
-    private static async performDailyCleanup() {
-        console.log('Executing daily cleanup logic...');
-        // Add your database cleanup or report generation here
-    }
+        this.isPreviousTaskEnded = false;
+
+        try {
+            const watchList = await getAllSubscribedRepos();
+            const updatedTags = await getUpdatedTag(watchList);
+            updatedTags.map(async (el) => {
+                const emails = await getEmailsListByRepoAndTagAndUpdateTag(el.repo, el.last_seen_tag, el.newTag);
+                emails.map(async (email) => {
+                    await sendUpdatedEmail(email.email, el.repo, el.newTag);
+                })
+            })
+            console.log(updatedTags);
+        } catch (error) {
+            console.error('every 15 min:', error);
+        } finally {
+            this.isPreviousTaskEnded = true;
+        }
+    };
 }
-
-// Initialize in your main app file
-SchedulerService.init();

@@ -1,7 +1,7 @@
 import { type Request, type Response } from "express";
 import { type PrismaClientKnownRequestError } from "../../generated/prisma/internal/prismaNamespace";
 
-import { create, getSubscriptionsByEmail } from "../models/subscription";
+import { create, getAllSubscribedRepos, getSubscriptionsByEmail } from "../models/subscription";
 import { getReleaseTagByRepo, isRepoExists} from "../services/github.service";
 import { sendConfirmationEmail, sendUpdateEmail } from "../services/email.service";
 import { verifyToken } from "../services/jwt.service";

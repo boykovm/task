@@ -24,7 +24,7 @@ export const sendEmail = async (email: string) => {
 export const sendConfirmationEmail = async (email: string, token: string) => {
 	const convertedToken = Buffer.from(token).toString('base64url');
 
-	const confirmationLink = `http://localhost:3000/api/confirm/${convertedToken}`;
+	const confirmationLink = `http://localhost:4443/api/confirm/${convertedToken}`;
 
 	await transporter.sendMail({
 		from: 'test@example.com',
@@ -37,7 +37,7 @@ export const sendConfirmationEmail = async (email: string, token: string) => {
 export const sendUpdateEmail = async (email: string, token: string, repo: string, action: string) => {
 	const convertedToken = Buffer.from(token).toString('base64url');
 
-	const newLink = action === ConfirmationAction.SUBSCRIBE ? `http://localhost:3000/api/unsubscribe/${convertedToken}` : `http://localhost:3000/api/confirm/${convertedToken}`;
+	const newLink = action === ConfirmationAction.SUBSCRIBE ? `http://localhost:4443/api/unsubscribe/${convertedToken}` : `http://localhost:4443/api/confirm/${convertedToken}`;
 
 	const status = action === ConfirmationAction.SUBSCRIBE ? 'unsubscribed' : 'subscribed';
 
@@ -49,4 +49,13 @@ export const sendUpdateEmail = async (email: string, token: string, repo: string
 		subject: 'Your subscription was updated',
 		text: `Your subscription for ${repo} was updated to ${status} status. If you want to ${actionText} then click on the link below ${newLink}`
 	});
+}
+
+export const sendUpdatedEmail = async (email: string, repo: string, newTag: string) => {
+	await transporter.sendMail({
+		from: 'test@example.com',
+		to: email,
+		subject: `New release for ${repo}`,
+		text: `Hi, there is a new release for ${repo} with tag ${newTag}`,
+	})
 }

@@ -37,12 +37,29 @@ export const getReleaseTagByRepo = async (repo: string)=> {
             return ''
         }
 
-        const { tag_name } = await response.json()
+        const { tag_name = '' } = await response.json()
 
-        return tag_name
+        return tag_name as string
     } catch (error) {
         return ''
     }
 }
 
 // todo: add 429 error handler
+
+export const getUpdatedTag = async (data: Array<Record<'repo' | 'last_seen_tag', string>>) => {
+    const promises = data.map(async (item) => {
+        const tag = await getReleaseTagByRepo(item.repo);
+
+        if (tag && tag !== item.last_seen_tag) {
+            return {
+                ...item,
+                newTag: tag
+            };
+        }
+        return null;
+    });
+
+    const results = await Promise.all(promises);
+    return results.filter((item): item is (Record<'repo' | 'last_seen_tag' | 'newTag', string>) => item !== null);
+}
