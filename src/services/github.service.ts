@@ -11,29 +11,39 @@ class GithubService {
         ),
     }
     isAuth = !!process.env.GITHUB_TOKEN
-    rateLimit = this.isAuth ? 5000 : 60
-    resetTime = 0
+    remainingLimit = this.isAuth ? 5000 : 60
+    resetTime: number  = 0
 
     constructor() {}
 
     async isRepoExists(owner: string, repo: string) {
-        // if (!this.rateLimit) {
-        //     return false
-        // }
+        if (!this.isRequestAvailable()) {
+            throw new Error('Rate limit exceeded')
+        }
+
+        this.removeRequest()
 
         try {
-            const data = await fetch(`${GITHUB_API_URL}/repos/${owner}/${repo}`, {
+            const { status, headers } = await fetch(`${GITHUB_API_URL}/repos/${owner}/${repo}`, {
                 method: 'GET',
                 headers: this.headers
             })
 
-            return data.status === 200
+            this.updateLimit(headers)
+
+            return status === 200
         } catch (error) {
             return false;
         }
     }
 
     async getReleaseTagByRepo(repo: string) {
+        if (!this.isRequestAvailable()) {
+            throw new Error('Rate limit exceeded')
+        }
+
+        this.removeRequest()
+
         try {
             const response = await fetch(`${GITHUB_API_URL}/repos/${repo}/releases/latest`, {
                 method: 'GET',
@@ -45,6 +55,9 @@ class GithubService {
                 return ''
             }
 
+            this.updateLimit(response.headers)
+
+
             const { tag_name = '' } = await response.json()
 
             return tag_name as string
@@ -53,7 +66,7 @@ class GithubService {
         }
     }
 
-    async getUpdatedTag (data: Array<Record<'repo' | 'last_seen_tag', string>>) {
+    async getUpdatedTag(data: Array<Record<'repo' | 'last_seen_tag', string>>) {
         const promises = data.map(async (item) => {
             const tag = await this.getReleaseTagByRepo(item.repo);
 
@@ -68,6 +81,25 @@ class GithubService {
 
         const results = await Promise.all(promises);
         return results.filter((item): item is (Record<'repo' | 'last_seen_tag' | 'newTag', string>) => item !== null);
+    }
+
+    isRequestAvailable() {
+        if (this.remainingLimit > 0 || !this.resetTime) {
+            return true
+        }
+
+        const currentTime = Date.now() / 1000
+
+        return currentTime > this.resetTime
+    }
+
+    updateLimit(headers: Headers) {
+        this.remainingLimit = Number.parseInt(headers.get('X-RateLimit-Remaining') || '')
+        this.resetTime = Number.parseInt(headers.get('X-RateLimit-Reset') || '')
+    }
+
+    removeRequest() {
+        this.remainingLimit -= 1
     }
 }
 
