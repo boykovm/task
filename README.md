@@ -141,6 +141,12 @@ Run the project's test suite with:
 npm test
 ```
 
+Run the project's e2e test suite with:
+
+```bash
+npm test:e2e
+```
+
 There are Jest tests in `src/**/*.test.ts` already
 
 ## Code generation / build notes

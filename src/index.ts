@@ -2,9 +2,9 @@ import express, { type Request, type Response, urlencoded } from 'express';
 
 import subscriptionsRouter from './routes/subscription';
 import { prisma } from "../lib/prisma";
-import {SchedulerService} from "./services/scheduler.service";
+import { SchedulerService } from "./services/scheduler.service";
 
-const app = express();
+export const app = express();
 const port = process.env.PORT || 3000;
 
 app.get('/', (req: Request, res: Response) => {
@@ -16,6 +16,9 @@ app.use(urlencoded({ extended: false }));
 app.use('/api', subscriptionsRouter);
 
 async function main() {
+    if (process.env.NODE_ENV === 'test') {
+        return;
+    }
     try {
         await prisma.$connect().then(() => {
             console.log('[server]: Server is connected to DB');
