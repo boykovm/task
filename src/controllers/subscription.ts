@@ -4,7 +4,7 @@ import { type PrismaClientKnownRequestError } from "../../generated/prisma/inter
 import { create, getSubscriptionsByEmail } from "../models/subscription";
 import { getReleaseTagByRepo, isRepoExists } from "../services/github.service";
 import { isValidEmail, sendConfirmationEmail, sendUpdateEmail } from "../services/email.service";
-import { verifyToken } from "../services/jwt.service";
+import { verifyToken, type SubscriptionPayload } from "../services/jwt.service";
 import {
     confirmSubscription as confirmSubscriptionByEmailAndToken, unsubscribeFromSubscription,
 } from "../models/confirmation";
@@ -78,7 +78,7 @@ export const confirmSubscription = async (req: Request, res: Response) => {
 
         const decodedToken = Buffer.from(token as string, 'base64url').toString('utf-8');
 
-        let data;
+        let data: SubscriptionPayload;
 
         try {
             data = verifyToken(decodedToken)
@@ -90,9 +90,6 @@ export const confirmSubscription = async (req: Request, res: Response) => {
             return res.status(400).send('Invalid token')
         }
 
-        if (!data) {
-            return res.status(400).send('Invalid token')
-        }
 
         const newToken = await confirmSubscriptionByEmailAndToken(data.email, data.repo, decodedToken)
 
@@ -120,7 +117,7 @@ export const unsubscribe = async (req: Request, res: Response) => {
 
         const decodedToken = Buffer.from(token as string, 'base64url').toString('utf-8');
 
-        let data;
+        let data: SubscriptionPayload;
 
         try {
             data = verifyToken(decodedToken)
