@@ -34,6 +34,10 @@ npm ci
 
 Create copy of `.env.example` file into `.env` file and fill in env variables. Typical variables used by this project are:
 
+```bash
+cp ./.env.example ./.env
+```
+
 ```
 DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/DATABASE_NAME?schema=public
 PORT=3000
@@ -164,4 +168,3 @@ There are Jest tests in `src/**/*.test.ts` already
 - Prisma client usage: `lib/prisma.ts` and `generated/prisma` generated client
 
 ---
-
