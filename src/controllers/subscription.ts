@@ -2,7 +2,7 @@ import { type Request, type Response } from "express";
 import { type PrismaClientKnownRequestError } from "../../generated/prisma/internal/prismaNamespace";
 
 import { create, getSubscriptionsByEmail } from "../models/subscription";
-import { getReleaseTagByRepo, isRepoExists } from "../services/github.service";
+import { githubService } from "../services/github.service";
 import { isValidEmail, sendConfirmationEmail, sendUpdateEmail } from "../services/email.service";
 import { verifyToken, type SubscriptionPayload } from "../services/jwt.service";
 import {
@@ -46,11 +46,11 @@ export const createSubscription = async (req: Request, res: Response) => {
             return res.status(400).send(errors.join(', '))
         }
 
-        if (!(await isRepoExists(owner, repoName))) {
+        if (!(await githubService.isRepoExists(owner, repoName))) {
             return res.status(404).send('Repository not found on GitHub')
         }
 
-        const tag = await getReleaseTagByRepo(`${owner}/${repoName}`)
+        const tag = await githubService.getReleaseTagByRepo(`${owner}/${repoName}`)
 
         const { token } = await create({ email, repo, last_seen_tag: tag })
 

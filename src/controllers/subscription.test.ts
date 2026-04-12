@@ -10,7 +10,7 @@ jest.mock('../../lib/prisma', () => ({
 
 import { createSubscription, confirmSubscription, unsubscribe, getSubscriptions } from './subscription';
 import { create, getSubscriptionsByEmail } from '../models/subscription';
-import { isRepoExists } from '../services/github.service';
+import { githubService } from '../services/github.service';
 import { sendEmail, sendConfirmationEmail, sendUpdateEmail, isValidEmail } from '../services/email.service';
 import { verifyToken } from '../services/jwt.service';
 import { confirmSubscription as confirmSubscriptionByEmailAndToken, unsubscribeFromSubscription } from '../models/confirmation';
@@ -22,8 +22,10 @@ jest.mock('../models/subscription', () => ({
 }));
 
 jest.mock('../services/github.service', () => ({
-  isRepoExists: jest.fn(),
-  getReleaseTagByRepo: jest.fn(() => Promise.resolve('v1.0.0')),
+  githubService: {
+    isRepoExists: jest.fn(),
+    getReleaseTagByRepo: jest.fn(() => Promise.resolve('v1.0.0')),
+  },
 }));
 
 jest.mock('../services/email.service', () => ({
@@ -45,7 +47,7 @@ jest.mock('../models/confirmation', () => ({
 
 const mockCreate = jest.mocked(create);
 const mockGetSubscriptionsByEmail = jest.mocked(getSubscriptionsByEmail);
-const mockIsRepoExists = jest.mocked(isRepoExists);
+const mockIsRepoExists = jest.mocked(githubService.isRepoExists);
 const mockSendEmail = jest.mocked(sendEmail);
 const mockSendConfirmationEmail = jest.mocked(sendConfirmationEmail);
 const mockSendUpdateEmail = jest.mocked(sendUpdateEmail);

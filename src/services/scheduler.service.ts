@@ -3,10 +3,8 @@ import {
     getAllSubscribedRepos,
     getEmailsListByRepoAndTagAndUpdateTag
 } from "../models/subscription";
-import { getUpdatedTag } from "./github.service";
+import { githubService } from "./github.service";
 import { sendUpdatedEmail } from "./email.service";
-
-
 
 export class SchedulerService {
     private static isPreviousTaskEnded = true;
@@ -24,7 +22,7 @@ export class SchedulerService {
 
         try {
             const watchList = await getAllSubscribedRepos();
-            const updatedTags = await getUpdatedTag(watchList);
+            const updatedTags = await githubService.getUpdatedTag(watchList);
             updatedTags.map(async (el) => {
                 const emails = await getEmailsListByRepoAndTagAndUpdateTag(el.repo, el.last_seen_tag, el.newTag);
                 emails.map(async (email) => {
