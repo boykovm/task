@@ -10,6 +10,7 @@ const mockedJwt = jest.mocked(jwt);
 
 describe('jwt.service', () => {
     const email = 'test@example.com';
+    const repo = 'o/n';
     const token = 'my-test-token';
     const action = ConfirmationAction.SUBSCRIBE;
     const secret = process.env.JWT_SECRET || 'your-very-secure-secret';
@@ -20,13 +21,13 @@ describe('jwt.service', () => {
 
     describe('generateToken', () => {
         it('should call jwt.sign with correct parameters', () => {
-            const expectedPayload = { email, token, action };
+            const expectedPayload = { email, repo, action };
             const expectedOptions = { algorithm: 'HS256', expiresIn: '24H' };
             const mockSignedToken = 'mocked.jwt.token';
 
             mockedJwt.sign.mockReturnValue(mockSignedToken as any);
 
-            const result = generateToken(email, token, action);
+            const result = generateToken(email, repo, action);
 
             expect(mockedJwt.sign).toHaveBeenCalledWith(expectedPayload, secret, expectedOptions);
             expect(result).toBe(mockSignedToken);

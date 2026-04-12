@@ -23,14 +23,14 @@ jest.mock('../models/subscription', () => ({
 
 jest.mock('../services/github.service', () => ({
   isRepoExists: jest.fn(),
-  getReleaseTagByRepo: jest.fn().mockResolvedValue('v1.0.0'),
+  getReleaseTagByRepo: jest.fn(() => Promise.resolve('v1.0.0')),
 }));
 
 jest.mock('../services/email.service', () => ({
   sendEmail: jest.fn(),
-  isValidEmail: jest.fn().mockImplementation((email: string) => email && email.includes('@')),
-  sendConfirmationEmail: jest.fn().mockResolvedValue(undefined),
-  sendUpdateEmail: jest.fn().mockResolvedValue(undefined),
+  isValidEmail: jest.fn((email: string) => email && email.includes('@')),
+  sendConfirmationEmail: jest.fn(() => Promise.resolve()),
+  sendUpdateEmail: jest.fn(() => Promise.resolve()),
 }));
 
 jest.mock('../services/jwt.service', () => ({
