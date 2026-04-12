@@ -62,6 +62,7 @@ export const createSubscription = async (req: Request, res: Response) => {
         if (error instanceof Error && error.name === 'PrismaClientKnownRequestError' && (error as PrismaClientKnownRequestError).code === 'P2002') {
                 return res.status(409).send('Email already subscribed to this repository')
         }
+        // todo: add rate limiter response
 
         console.error(error)
         res.status(500).send('Internal Server Error')

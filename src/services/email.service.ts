@@ -3,8 +3,8 @@ import SMTPPool from "nodemailer/lib/smtp-pool";
 import { ConfirmationAction } from "../../generated/prisma/enums";
 
 const nodemailerConfig: SMTPPool.Options = {
-	host: 'mailhog', // Use the Docker service name
-	port: 1025,      // The internal SMTP port
+	host: process.env.SMTP_HOST || 'mailhog',
+	port: Number.parseInt(process.env.SMTP_PORT ?? '') || 1025,
 	secure: false,   // Usually false for local development
 	auth: undefined,       // Most local test servers don't require auth by default
 	pool: true,
@@ -24,7 +24,7 @@ export const sendEmail = async (email: string) => {
 export const sendConfirmationEmail = async (email: string, token: string) => {
 	const convertedToken = Buffer.from(token).toString('base64url');
 
-	const confirmationLink = `http://localhost:4443/api/confirm/${convertedToken}`;
+	const confirmationLink = `http://localhost:3000/api/confirm/${convertedToken}`;
 
 	await transporter.sendMail({
 		from: 'test@example.com',
@@ -37,7 +37,7 @@ export const sendConfirmationEmail = async (email: string, token: string) => {
 export const sendUpdateEmail = async (email: string, token: string, repo: string, action: string) => {
 	const convertedToken = Buffer.from(token).toString('base64url');
 
-	const newLink = action === ConfirmationAction.SUBSCRIBE ? `http://localhost:4443/api/unsubscribe/${convertedToken}` : `http://localhost:4443/api/confirm/${convertedToken}`;
+	const newLink = action === ConfirmationAction.SUBSCRIBE ? `http://localhost:3000/api/unsubscribe/${convertedToken}` : `http://localhost:3000/api/confirm/${convertedToken}`;
 
 	const status = action === ConfirmationAction.SUBSCRIBE ? 'unsubscribed' : 'subscribed';
 

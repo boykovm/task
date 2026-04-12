@@ -14,6 +14,8 @@ class GithubService {
     remainingLimit = this.isAuth ? 5000 : 60
     resetTime: number  = 0
 
+    // todo: add cache
+
     constructor() {}
 
     async isRepoExists(owner: string, repo: string) {
@@ -67,6 +69,8 @@ class GithubService {
     }
 
     async getUpdatedTag(data: Array<Record<'repo' | 'last_seen_tag', string>>) {
+        // todo: add rate limiter handler
+
         const promises = data.map(async (item) => {
             const tag = await this.getReleaseTagByRepo(item.repo);
 

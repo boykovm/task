@@ -23,6 +23,7 @@ export class SchedulerService {
         try {
             const watchList = await getAllSubscribedRepos();
             const updatedTags = await githubService.getUpdatedTag(watchList);
+            // todo: add rate limiter handler
             updatedTags.map(async (el) => {
                 const emails = await getEmailsListByRepoAndTagAndUpdateTag(el.repo, el.last_seen_tag, el.newTag);
                 emails.map(async (email) => {

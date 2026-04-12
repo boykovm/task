@@ -57,12 +57,13 @@ services:
       NODE_ENV: development
       PORT: 3000
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-taskdb}
-      REDIS_URL: redis://redis:6379
+      REDIS_URL: redis://redis:6379s
       JWT_SECRET: ${JWT_SECRET:-your_jwt_secret}
       SMTP_HOST: mailhog
       SMTP_PORT: 1025
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
     ports:
-      - "4443:3000"
+      - "3000:3000"
     volumes:
       - .:/app
       - /app/node_modules

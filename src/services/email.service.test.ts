@@ -63,7 +63,7 @@ describe('email.service', () => {
 			const email = 'user@example.com';
 			const token = 'my-secret-token';
 			const encodedToken = Buffer.from(token).toString('base64url');
-			const confirmationLink = `http://localhost:4443/api/confirm/${encodedToken}`;
+			const confirmationLink = `http://localhost:3000/api/confirm/${encodedToken}`;
 
 			await sendConfirmationEmail(email, token);
 
@@ -83,7 +83,7 @@ describe('email.service', () => {
 			const repo = 'owner/repo';
 			const action = ConfirmationAction.SUBSCRIBE;
 			const encodedToken = Buffer.from(token).toString('base64url');
-			const newLink = `http://localhost:4443/api/unsubscribe/${encodedToken}`;
+			const newLink = `http://localhost:3000/api/unsubscribe/${encodedToken}`;
 
 			await sendUpdateEmail(email, token, repo, action);
 
@@ -101,7 +101,7 @@ describe('email.service', () => {
 			const repo = 'owner/repo';
 			const action = ConfirmationAction.UNSUBSCRIBE;
 			const encodedToken = Buffer.from(token).toString('base64url');
-			const newLink = `http://localhost:4443/api/confirm/${encodedToken}`;
+			const newLink = `http://localhost:3000/api/confirm/${encodedToken}`;
 
 			await sendUpdateEmail(email, token, repo, action);
 
